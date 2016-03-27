@@ -11,10 +11,9 @@
 </body>
 
 <script>
+var server = new WebSocket("ws://127.0.0.1:8084");
 var canvasElement = document.getElementById("displayArea");
 var displayArea = canvasElement.getContext("2d");
-var SerialPort = require("serialport").SerialPort
-var serialPort = new SerialPort("/dev/cu.usbmodem00000001", {baudrate: 57600} );
 
 serialPort.open(function(err){
 	if(err)
@@ -41,7 +40,7 @@ controller.on("connect", function(){
         var canvasZ = parseInt(10 * normalizedPosition[2]);
         //we can ignore z for a 2D context
         out.innerHTML = "X: "+canvasX + "Y: "+canvasZ + " Z: " + canvasY
-        serialPort.write(canvasX+","+canvasZ+","+canvasY);
+        server.send(canvasX + "," + canvasZ + "," + canvasY);
         displayArea.strokeText("(" + canvasX.toFixed(1) + ", " + canvasY.toFixed(1) + ")", canvasX, canvasY);
     }
 }, 1000);
