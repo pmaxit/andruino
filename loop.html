@@ -13,6 +13,14 @@
 <script>
 var canvasElement = document.getElementById("displayArea");
 var displayArea = canvasElement.getContext("2d");
+var SerialPort = require("serialport").SerialPort
+var serialPort = new SerialPort("/dev/cu.usbmodem00000001", {baudrate: 57600} );
+
+serialPort.open(function(err){
+	if(err)
+		console.log("Failed to open "+ err);
+})
+
 
 var controller = new Leap.Controller();
 controller.on("connect", function(){
@@ -21,18 +29,19 @@ controller.on("connect", function(){
     if(frame.pointables.length > 0)
     {
         canvasElement.width = canvasElement.width; //clear
-        
+
         //Get a pointable and normalize the tip position
         var pointable = frame.pointables[0];
         var interactionBox = frame.interactionBox;
         var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
-        
+
         // Convert the normalized coordinates to span the canvas
         var canvasX = parseInt(canvasElement.width * normalizedPosition[0])
         var canvasY = parseInt(canvasElement.height * (normalizedPosition[1]))
         var canvasZ = parseInt(10 * normalizedPosition[2]);
         //we can ignore z for a 2D context
-        out.innerHTML = "X: "+canvasX + "Y: "+canvasY + " Z: " + canvasZ
+        out.innerHTML = "X: "+canvasX + "Y: "+canvasZ + " Z: " + canvasY
+        serialPort.write(canvasX+","+canvasZ+","+canvasY);
         displayArea.strokeText("(" + canvasX.toFixed(1) + ", " + canvasY.toFixed(1) + ")", canvasX, canvasY);
     }
 }, 1000);
