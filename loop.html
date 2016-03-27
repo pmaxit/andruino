@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Loop - Leap</title>
+
+    <script src="../leap-0.6.4.js"></script>
+
+<body>
+<canvas id="displayArea" width="10" height="10" style="background:#dddddd;"></canvas>
+<div id="out"> </div>
+</body>
+
+<script>
+var canvasElement = document.getElementById("displayArea");
+var displayArea = canvasElement.getContext("2d");
+
+var controller = new Leap.Controller();
+controller.on("connect", function(){
+	setInterval(function(){
+		var frame = controller.frame();
+    if(frame.pointables.length > 0)
+    {
+        canvasElement.width = canvasElement.width; //clear
+        
+        //Get a pointable and normalize the tip position
+        var pointable = frame.pointables[0];
+        var interactionBox = frame.interactionBox;
+        var normalizedPosition = interactionBox.normalizePoint(pointable.tipPosition, true);
+        
+        // Convert the normalized coordinates to span the canvas
+        var canvasX = parseInt(canvasElement.width * normalizedPosition[0])
+        var canvasY = parseInt(canvasElement.height * (normalizedPosition[1]))
+        var canvasZ = parseInt(10 * normalizedPosition[2]);
+        //we can ignore z for a 2D context
+        out.innerHTML = "X: "+canvasX + "Y: "+canvasY + " Z: " + canvasZ
+        displayArea.strokeText("(" + canvasX.toFixed(1) + ", " + canvasY.toFixed(1) + ")", canvasX, canvasY);
+    }
+}, 1000);
+});
+controller.connect();
+</script>
+</html>
